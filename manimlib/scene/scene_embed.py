@@ -14,6 +14,8 @@ from manimlib.mobject.mobject import Mobject
 from manimlib.mobject.frame import FullScreenRectangle
 from manimlib.module_loader import ModuleLoader
 
+# play sound when error ocurred
+import winsound
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -107,6 +109,7 @@ class InteractiveSceneEmbed:
             shell.showtraceback((etype, evalue, tb), tb_offset=tb_offset)
             rect = FullScreenRectangle().set_stroke(RED, 30).set_fill(opacity=0)
             rect.fix_in_frame()
+            winsound.MessageBeep()  # play sound when error ocurred
             self.scene.play(VFadeInThenOut(rect, run_time=0.5))
 
         self.shell.set_custom_exc((Exception,), custom_exc)
