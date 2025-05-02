@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from addict import Dict
 
 from manimlib import __version__
 from manimlib.config import manim_config
@@ -21,9 +20,7 @@ def run_scenes():
     """
     Runs the scenes in a loop and detects when a scene reload is requested.
     """
-    # Create a new dict to be able to upate without
-    # altering global configuration
-    scene_config = Dict(manim_config.scene)
+    scene_config = manim_config.scene
     run_config = manim_config.run
 
     if run_config.show_in_window:
