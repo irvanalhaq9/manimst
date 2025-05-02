@@ -18,6 +18,7 @@ from manimlib.module_loader import ModuleLoader
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from manimlib.scene.scene import Scene
+    from manimlib.typing import ManimColor
 
 
 class InteractiveSceneEmbed:
@@ -75,7 +76,8 @@ class InteractiveSceneEmbed:
             i2m=scene.i2m,
             checkpoint_paste=self.checkpoint_paste,
             clear_checkpoints=self.checkpoint_manager.clear_checkpoints,
-            reload=self.reload_scene  # Defined below
+            reload=self.reload_scene,  # Defined below
+            reload_background = self.reload_background,
         )
 
     def enable_gui(self):
@@ -157,6 +159,13 @@ class InteractiveSceneEmbed:
     ):
         with self.scene.temp_config_change(skip, record, progress_bar):
             self.checkpoint_manager.checkpoint_paste(self.shell, self.scene)
+
+    def reload_background(self, color: ManimColor, opacity: float = 1.0) -> None:
+        manim_config.camera.background_color = color
+        manim_config.camera.background_opacity = opacity
+        print("WARNING! This will NOT change background_color for rendering video.")
+        print("Use flag: -c [color] or custom_config.yml instead!")
+        self.shell.run_line_magic("exit_raise", "")
 
 
 class CheckpointManager:
