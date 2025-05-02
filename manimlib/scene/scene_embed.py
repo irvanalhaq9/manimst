@@ -80,6 +80,7 @@ class InteractiveSceneEmbed:
             clear_checkpoints=self.checkpoint_manager.clear_checkpoints,
             reload=self.reload_scene,  # Defined below
             reload_background = self.reload_background,
+            reload_skip = self.reload_skip,
         )
 
     def enable_gui(self):
@@ -143,6 +144,7 @@ class InteractiveSceneEmbed:
         if embed_line:
             run_config.embed_line = embed_line
 
+        manim_config.scene.skip_animations = False
         print("Reloading...")
         self.shell.run_line_magic("exit_raise", "")
 
@@ -168,6 +170,20 @@ class InteractiveSceneEmbed:
         manim_config.camera.background_opacity = opacity
         print("WARNING! This will NOT change background_color for rendering video.")
         print("Use flag: -c [color] or custom_config.yml instead!")
+        self.shell.run_line_magic("exit_raise", "")
+
+    def reload_skip(self, embed_line: int | None = None, preview: bool = True) -> None:
+        # Update the global run configuration.
+        manim_config.scene.skip_animations = True
+        manim_config.scene.preview_while_skipping = preview
+        manim_config.run.is_reload = True
+        if embed_line:
+            manim_config.run.embed_line = embed_line
+        print("Reloading...")
+        if preview:
+            print("Skipping with preview")
+        else:
+            print("Skipping without preview")
         self.shell.run_line_magic("exit_raise", "")
 
 
