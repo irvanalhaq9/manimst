@@ -169,6 +169,8 @@ class InteractiveSceneEmbed:
     def reload_background(self, color: ManimColor, opacity: float = 1.0) -> None:
         manim_config.camera.background_color = color
         manim_config.camera.background_opacity = opacity
+        manim_config.scene.skip_animations = True
+        manim_config.scene.preview_while_skipping = False
         print("WARNING! This will NOT change background_color for rendering video.")
         print("Use flag: -c [color] or custom_config.yml instead!")
         self.shell.run_line_magic("exit_raise", "")
@@ -189,6 +191,8 @@ class InteractiveSceneEmbed:
 
     def activate_autoreload(self, autoreload: bool = True) -> None:
         manim_config.embed.autoreload = autoreload
+        manim_config.scene.skip_animations = True
+        manim_config.scene.preview_while_skipping = False
         self.shell.run_line_magic("exit_raise", "")
 
 class CheckpointManager:
