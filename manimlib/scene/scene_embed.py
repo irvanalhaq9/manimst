@@ -81,6 +81,7 @@ class InteractiveSceneEmbed:
             reload=self.reload_scene,  # Defined below
             reload_background = self.reload_background,
             reload_skip = self.reload_skip,
+            activate_autoreload = self.activate_autoreload,
         )
 
     def enable_gui(self):
@@ -186,6 +187,9 @@ class InteractiveSceneEmbed:
             print("Skipping without preview")
         self.shell.run_line_magic("exit_raise", "")
 
+    def activate_autoreload(self, autoreload: bool = True) -> None:
+        manim_config.embed.autoreload = autoreload
+        self.shell.run_line_magic("exit_raise", "")
 
 class CheckpointManager:
     def __init__(self):
