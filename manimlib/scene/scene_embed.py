@@ -10,6 +10,7 @@ from IPython.terminal.embed import InteractiveShellEmbed
 from manimlib.animation.fading import VFadeInThenOut
 from manimlib.config import manim_config
 from manimlib.constants import RED
+from manimlib.logger import log
 from manimlib.mobject.mobject import Mobject
 from manimlib.mobject.frame import FullScreenRectangle
 from manimlib.module_loader import ModuleLoader
@@ -171,8 +172,8 @@ class InteractiveSceneEmbed:
         manim_config.camera.background_opacity = opacity
         manim_config.scene.skip_animations = True
         manim_config.scene.preview_while_skipping = False
-        print("WARNING! This will NOT change background_color for rendering video.")
-        print("Use flag: -c [color] or custom_config.yml instead!")
+        log.warning("This will NOT change background_color for rendering video.")
+        log.warning("Use flag: -c [color] or custom_config.yml instead!")
         self.shell.run_line_magic("exit_raise", "")
 
     def reload_skip(self, embed_line: int | None = None, preview: bool = True) -> None:
