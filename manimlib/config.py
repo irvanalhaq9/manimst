@@ -257,7 +257,7 @@ def update_camera_config(config: Dict, args: Namespace):
     if args.color:
         try:
             camera_config.background_color = colour.Color(args.color)
-        except Exception:
+        except Exception as err:
             log.error("Please use a valid color")
             log.error(err)
             sys.exit(2)
@@ -386,8 +386,13 @@ def get_output_directory(args: Namespace, config: Dict) -> str:
     out_dir = args.video_dir or dir_config.output
     if dir_config.mirror_module_path and args.file:
         file_path = Path(args.file).absolute()
-        rel_path = file_path.relative_to(dir_config.removed_mirror_prefix)
-        rel_path = Path(str(rel_path).lstrip("_"))
+        print(file_path)
+        print(dir_config.removed_mirror_prefix)
+        if str(file_path).startswith(dir_config.removed_mirror_prefix):
+            rel_path = file_path.relative_to(dir_config.removed_mirror_prefix)
+            rel_path = Path(str(rel_path).lstrip("_"))
+        else:
+            rel_path = file_path.stem
         out_dir = Path(out_dir, rel_path).with_suffix("")
     return out_dir
 
