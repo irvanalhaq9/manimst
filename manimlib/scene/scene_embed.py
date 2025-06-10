@@ -10,14 +10,18 @@ from IPython.terminal.embed import InteractiveShellEmbed
 from manimlib.animation.fading import VFadeInThenOut
 from manimlib.config import manim_config
 from manimlib.constants import RED
+from manimlib.logger import log
 from manimlib.mobject.mobject import Mobject
 from manimlib.mobject.frame import FullScreenRectangle
 from manimlib.module_loader import ModuleLoader
 
+# play sound when error ocurred
+import winsound
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from manimlib.scene.scene import Scene
+    from manimlib.typing import ManimColor
 
 
 class InteractiveSceneEmbed:
@@ -75,7 +79,10 @@ class InteractiveSceneEmbed:
             i2m=scene.i2m,
             checkpoint_paste=self.checkpoint_paste,
             clear_checkpoints=self.checkpoint_manager.clear_checkpoints,
-            reload=self.reload_scene  # Defined below
+            reload=self.reload_scene,  # Defined below
+            reload_background = self.reload_background,
+            reload_skip = self.reload_skip,
+            activate_autoreload = self.activate_autoreload,
         )
 
     def enable_gui(self):
@@ -105,6 +112,7 @@ class InteractiveSceneEmbed:
             shell.showtraceback((etype, evalue, tb), tb_offset=tb_offset)
             rect = FullScreenRectangle().set_stroke(RED, 30).set_fill(opacity=0)
             rect.fix_in_frame()
+            winsound.MessageBeep()  # play sound when error ocurred
             self.scene.play(VFadeInThenOut(rect, run_time=0.5))
 
         self.shell.set_custom_exc((Exception,), custom_exc)
@@ -138,6 +146,7 @@ class InteractiveSceneEmbed:
         if embed_line:
             run_config.embed_line = embed_line
 
+        manim_config.scene.skip_animations = False
         print("Reloading...")
         self.shell.run_line_magic("exit_raise", "")
 
@@ -158,6 +167,34 @@ class InteractiveSceneEmbed:
         with self.scene.temp_config_change(skip, record, progress_bar):
             self.checkpoint_manager.checkpoint_paste(self.shell, self.scene)
 
+    def reload_background(self, color: ManimColor, opacity: float = 1.0) -> None:
+        manim_config.camera.background_color = color
+        manim_config.camera.background_opacity = opacity
+        manim_config.scene.skip_animations = True
+        manim_config.scene.preview_while_skipping = False
+        log.warning("This will NOT change background_color for rendering video.")
+        log.warning("Use flag: -c [color] or custom_config.yml instead!")
+        self.shell.run_line_magic("exit_raise", "")
+
+    def reload_skip(self, embed_line: int | None = None, preview: bool = True) -> None:
+        # Update the global run configuration.
+        manim_config.scene.skip_animations = True
+        manim_config.scene.preview_while_skipping = preview
+        manim_config.run.is_reload = True
+        if embed_line:
+            manim_config.run.embed_line = embed_line
+        print("Reloading...")
+        if preview:
+            print("Skipping with preview")
+        else:
+            print("Skipping without preview")
+        self.shell.run_line_magic("exit_raise", "")
+
+    def activate_autoreload(self, autoreload: bool = True) -> None:
+        manim_config.embed.autoreload = autoreload
+        manim_config.scene.skip_animations = True
+        manim_config.scene.preview_while_skipping = False
+        self.shell.run_line_magic("exit_raise", "")
 
 class CheckpointManager:
     def __init__(self):
