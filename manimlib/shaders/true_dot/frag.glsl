@@ -2,6 +2,7 @@
 
 uniform float glow_factor;
 uniform mat4 perspective;
+uniform float shape_factor; // 0 for circle, 1 for square
 
 in vec4 color;
 in float scaled_aaw;
@@ -17,8 +18,13 @@ out vec4 frag_color;
 #INSERT finalize_color.glsl
 
 void main() {
-    float r = length(uv_coords.xy);
-    if(r > 1.0) discard;
+    // Compute distances for circle and square
+    float r_circle = length(uv_coords.xy);
+    float r_square = max(abs(uv_coords.x), abs(uv_coords.y));
+    // Interpolate between circle and square
+    float r = mix(r_circle, r_square, shape_factor);
+    // Discard pixels outside shape
+    if (r > 1.0) discard;
 
     frag_color = color;
 
