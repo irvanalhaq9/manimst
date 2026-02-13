@@ -2,7 +2,7 @@
 
 uniform float glow_factor;
 uniform mat4 perspective;
-uniform float shape_factor; // 0 for circle, 1 for square
+uniform float quad_factor; // 0 for circle, 1 for square
 
 in vec4 color;
 in float scaled_aaw;
@@ -22,7 +22,7 @@ void main() {
     float r_circle = length(uv_coords.xy);
     float r_square = max(abs(uv_coords.x), abs(uv_coords.y));
     // Interpolate between circle and square
-    float r = mix(r_circle, r_square, shape_factor);
+    float r = mix(r_circle, r_square, quad_factor);
     // Discard pixels outside shape
     if (r > 1.0) discard;
 

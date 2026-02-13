@@ -40,13 +40,13 @@ class DotCloud(PMobject):
         radius: float = DEFAULT_DOT_RADIUS,
         glow_factor: float = 0.0,
         anti_alias_width: float = 2.0,
-        shape_factor: float = 0.0,  # circle to square factor
+        quad_factor: float = 0.0,  # circle to square factor
         **kwargs
     ):
         self.radius = radius
         self.glow_factor = glow_factor
         self.anti_alias_width = anti_alias_width
-        self.shape_factor = shape_factor
+        self.quad_factor = quad_factor
 
         super().__init__(
             color=color,
@@ -62,7 +62,7 @@ class DotCloud(PMobject):
         super().init_uniforms()
         self.uniforms["glow_factor"] = self.glow_factor
         self.uniforms["anti_alias_width"] = self.anti_alias_width
-        self.uniforms["shape_factor"] = self.shape_factor
+        self.uniforms["quad_factor"] = self.quad_factor
 
     def to_grid(
         self,
@@ -131,14 +131,14 @@ class DotCloud(PMobject):
     def get_glow_factor(self) -> float:
         return self.uniforms["glow_factor"]
 
-    def set_shape_factor(self, shape_factor: float = 0.0) -> Self:
+    def set_quad_factor(self, quad_factor: float = 0.0) -> Self:
         """Set shape factor between circle and square."""
-        shape_factor = max(0.0, min(1.0, shape_factor))  # Simplified clamping
-        self.uniforms["shape_factor"] = shape_factor
+        quad_factor = max(0.0, min(1.0, quad_factor))  # Simplified clamping
+        self.uniforms["quad_factor"] = quad_factor
         return self
     
-    def get_shape_factor(self) -> float:
-        return self.uniforms["shape_factor"]
+    def get_quad_factor(self) -> float:
+        return self.uniforms["quad_factor"]
 
     def compute_bounding_box(self) -> Vect3Array:
         bb = super().compute_bounding_box()
@@ -181,7 +181,7 @@ class GlowDots(DotCloud):
         color: ManimColor = YELLOW,
         radius: float = DEFAULT_GLOW_DOT_RADIUS,
         glow_factor: float = 2.0,
-        shape_factor: float = 0.0,  # Default to circle
+        quad_factor: float = 0.0,  # Default to circle
         **kwargs,
     ):
         super().__init__(
@@ -189,7 +189,7 @@ class GlowDots(DotCloud):
             color=color,
             radius=radius,
             glow_factor=glow_factor,
-            shape_factor=shape_factor,
+            quad_factor=quad_factor,
             **kwargs,
         )
 
