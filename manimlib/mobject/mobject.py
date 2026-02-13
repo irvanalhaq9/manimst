@@ -1918,6 +1918,16 @@ class Mobject(object):
         self.set_uniform(recurse, is_fixed_in_frame=0.0)
         return self
 
+    @affects_shader_info_id
+    def set_fixed_in_frame_factor(self, value: float, recurse: bool = True) -> Self:
+        """Set the fix-in-frame factor (0.0 for unfixed, 1.0 for fixed)."""
+        value = max(0.0, min(1.0, value))
+        self.set_uniform(recurse, is_fixed_in_frame=value)
+        return self
+
+    def get_fixed_in_frame_factor(self) -> float:
+        return float(self.uniforms["is_fixed_in_frame"])
+
     def is_fixed_in_frame(self) -> bool:
         return bool(self.uniforms["is_fixed_in_frame"])
 
