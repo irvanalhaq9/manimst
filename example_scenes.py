@@ -9,7 +9,7 @@ import numpy as np
 # Use -n <number> to skip ahead to the n'th animation of a scene.
 
 
-class OpeningManimExample(Scene):
+class OpeningManimExample(InteractiveScene):
     def construct(self):
         intro_words = Text("""
             The original motivation for manim was to
@@ -66,9 +66,10 @@ class OpeningManimExample(Scene):
             run_time=6,
         )
         self.wait(2)
+        self.embed()
 
 
-class AnimatingMethods(Scene):
+class AnimatingMethods(InteractiveScene):
     def construct(self):
         grid = Tex(R"\pi").get_grid(10, 10, height=4)
         self.add(grid)
@@ -110,9 +111,10 @@ class AnimatingMethods(Scene):
             run_time=5,
         )
         self.wait()
+        self.embed()
 
 
-class TextExample(Scene):
+class TextExample(InteractiveScene):
     def construct(self):
         # To run this scene properly, you should have "Consolas" font in your computer
         # for full usage, you can see https://github.com/3b1b/manim/pull/680
@@ -151,9 +153,10 @@ class TextExample(Scene):
         self.wait()
         self.play(Write(slant))
         self.wait()
+        self.embed()
 
 
-class TexTransformExample(Scene):
+class TexTransformExample(InteractiveScene):
     def construct(self):
         # Tex to color map
         t2c = {
@@ -223,9 +226,10 @@ class TexTransformExample(Scene):
         self.wait()
         self.play(TransformMatchingShapes(target, saved_source, **kw))
         self.wait()
+        self.embed()
 
 
-class TexIndexing(Scene):
+class TexIndexing(InteractiveScene):
     def construct(self):
         # You can index into Tex mobject (or other StringMobjects) by substrings
         equation = Tex(R"e^{\pi i} = -1", font_size=144)
@@ -276,9 +280,10 @@ class TexIndexing(Scene):
         self.play(equation[R"\infty"].animate.set_color(RED))  # Got it!
         self.wait()
         self.play(FadeOut(equation))
+        self.embed()
 
 
-class UpdatersExample(Scene):
+class UpdatersExample(InteractiveScene):
     def construct(self):
         square = Square()
         square.set_fill(BLUE_E, 1)
@@ -336,9 +341,10 @@ class UpdatersExample(Scene):
             lambda m: m.set_width(w0 * math.sin(self.time - now) + w0)
         )
         self.wait(4 * PI)
+        self.embed()
 
 
-class CoordinateSystemExample(Scene):
+class CoordinateSystemExample(InteractiveScene):
     def construct(self):
         axes = Axes(
             # x-axis ranges from -1 to 10, with a default step size of 1
@@ -415,9 +421,9 @@ class CoordinateSystemExample(Scene):
 
         # Other coordinate systems you can play around with include
         # ThreeDAxes, NumberPlane, and ComplexPlane.
+        self.embed()
 
-
-class GraphExample(Scene):
+class GraphExample(InteractiveScene):
     def construct(self):
         axes = Axes((-3, 10), (-1, 8), height=6)
         axes.add_coordinate_labels()
@@ -493,9 +499,10 @@ class GraphExample(Scene):
         self.play(x_tracker.animate.set_value(4), run_time=3)
         self.play(x_tracker.animate.set_value(-2), run_time=3)
         self.wait()
+        self.embed()
 
 
-class TexAndNumbersExample(Scene):
+class TexAndNumbersExample(InteractiveScene):
     def construct(self):
         axes = Axes((-3, 3), (-3, 3), unit_size=1)
         axes.to_edge(DOWN)
@@ -561,9 +568,10 @@ class TexAndNumbersExample(Scene):
             ReplacementTransform(circle.copy(), new_curve),
             circle.animate.set_stroke(width=1, opacity=0.5),
         )
+        self.embed()
 
 
-class SurfaceExample(ThreeDScene):
+class SurfaceExample(ThreeDScene, InteractiveScene):
     def construct(self):
         surface_text = Text("For 3d scenes, try using surfaces")
         surface_text.fix_in_frame()
@@ -643,9 +651,10 @@ class SurfaceExample(ThreeDScene):
 
         self.play(FadeTransform(light_text, drag_text))
         self.wait()
+        self.embed()
 
 
-class InteractiveDevelopment(Scene):
+class InteractiveDevelopment(InteractiveScene):
     def construct(self):
         circle = Circle()
         circle.set_fill(BLUE, opacity=0.5)
@@ -691,7 +700,7 @@ class InteractiveDevelopment(Scene):
         always(circle.move_to, self.mouse_point)
 
 
-class ControlsExample(Scene):
+class ControlsExample(InteractiveScene):
     drag_to_pan = False
 
     def setup(self):
@@ -728,7 +737,7 @@ class ControlsExample(Scene):
 
         self.textbox.set_value("Manim")
         # self.wait(60)
-        # self.embed()
+        self.embed()
 
 
 # See https://github.com/3b1b/videos for many, many more
