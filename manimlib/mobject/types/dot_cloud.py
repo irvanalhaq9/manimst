@@ -204,3 +204,34 @@ class GlowDots(DotCloud):
 class GlowDot(GlowDots):
     def __init__(self, center: Vect3 = ORIGIN, **kwargs):
         super().__init__(points=np.array([center]), **kwargs)
+
+    def get_quad_coordinates(
+        self,
+        camera_position: np.ndarray,
+    ) -> np.ndarray:
+        """
+        Ini menghasilkan quad atau segi-4 untuk dot, seperti yang ada di
+        geometry_shader dari true_dot.
+        
+        """
+        point = self.data["point"]
+        radius = self.data["radius"]
+            # menghasilkan vektor yang menghadap kamera
+        to_cam_vector = camera_position - point
+        to_cam_normal = to_cam_vector / np.linalg.norm(to_cam_vector)
+            # vektor kanan tegak lurus terhadap vektor kamera
+        right_vector = np.cross(np.array([0.0,1.0,1.0]), to_cam_normal)
+        right_normal = right_vector/np.linalg.norm(right_vector)
+        right = radius * right_normal
+            # vektor atas tegak lurus terhadap 2 vektor lainnya.
+            # di ruang 3 dimensi hanya ada 3 vektor yang saling tegak lurus
+            # satu-sama lain, tidak bisa lebih.
+            # jadi ini akan menghasilkan bidang yang selalu menghadap kamera.
+        up_vector = np.cross(to_cam_normal, right)
+        up_normal = up_vector/np.linalg.norm(up_vector)
+        up = radius * up_normal
+        
+        # offset: sudut-sudut dari quad
+        offsets = [(-1,-1),(-1,1),(1,-1),(1,1)]
+        corners = [point+i*right+j*up for i,j in offsets]
+        return np.array(corners)

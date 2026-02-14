@@ -254,6 +254,69 @@ class Camera(object):
             light_position=tuple(light_pos),
         )
 
+    def info_uniforms(self) -> None:
+        frame = self.frame
+        uniforms = self.uniforms
+        view_matrix = frame.get_view_matrix()
+        frf = uniforms["frame_rescale_factors"]
+        print("view_matrix:\n",view_matrix)
+        print("light_position:",uniforms["light_position"])
+        print("camera_position:",uniforms["camera_position"])
+        print("FRAME_WIDTH:",FRAME_WIDTH)
+        print("FRAME_HEIGHT:",FRAME_HEIGHT)
+        print("frame_scale:",uniforms["frame_scale"])
+        print("focal_distance:",frame.get_focal_distance())
+        print("pixel_size:",uniforms["pixel_size"])
+        print("frame_rescale_factors:\n",frf)
+
+    def emit_gl_Position(
+        self,
+        point: np.ndarray,
+        is_fixed_in_frame: float = 0.0,
+        ) -> np.ndarray:
+        """
+        Fungsi ini sesuai dengan shader, yaitu mentransformasi koordinat manim
+        menjadi koordinat opengl dengan menerapkan projection dari
+        view_matrix. gl_Position ini akan digunakan untuk membuat 
+        koordinat Normalized Device Coordinate (NDC).
+        """
+        frame = self.frame
+        uniforms = self.uniforms
+        view = frame.get_view_matrix()
+        frf = uniforms["frame_rescale_factors"]
+        
+        # 1. buat vektor 4D dari point
+        result = np.append(point,1.0)
+        
+        # 2. Transformasi view, lalu mix
+        transformed = view @ result
+        result = (1.0-is_fixed_in_frame)*transformed+is_fixed_in_frame*result
+        
+        # 3. rescale
+        result[:3] *= frf
+        
+        # 4. set w dan manipulasi z
+        result[3] = 1 - result[2]
+        result[2] *= -0.1
+        
+        # 5. hasil akhir
+        gl_Position = result
+        
+        return gl_Position
+    
+    def get_ndc_coordinate(self,point: np.ndarray,**kwargs) -> np.ndarray:
+        """
+        Ini adalah koordinat di layar yang sebenarnya. 
+        Koordinat setelah penyesuaian perspektif 3 dimensi.
+        Ini menghasilkan NDC: Yaitu koordinat x,y,z dibagi w
+        Nilai itu semua dari gl_Position. x dan y adalah koodinat di layar
+        atau window. z itu digunakan untuk depth test, jadi tidak mempengaruhi
+        koordinat di layar. Setelah dibagi w itulah yang menghasilkan perspektif
+        3 dimensi.
+        """
+        gl_Position = self.emit_gl_Position(point,**kwargs)
+        coord = gl_Position[:3]/gl_Position[3]
+        return coord
 
 # Mostly just defined so old scenes don't break
 class ThreeDCamera(Camera):
