@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import moderngl
+from moderngl_window.timers.clock import Timer
 import numpy as np
 import OpenGL.GL as gl
 from PIL import Image
@@ -65,6 +66,8 @@ class Camera(object):
         self.init_context()
         self.init_fbo()
         self.init_light_source()
+        self.timer = Timer()
+        self.timer.start()
 
     def init_frame(self, **config) -> None:
         self.frame = CameraFrame(**config)
@@ -240,6 +243,7 @@ class Camera(object):
         view_matrix = frame.get_view_matrix()
         light_pos = self.light_source.get_location()
         cam_pos = self.frame.get_implied_camera_location()
+        now = self.timer.time
 
         self.uniforms.update(
             view=tuple(view_matrix.T.flatten()),
@@ -252,6 +256,7 @@ class Camera(object):
             pixel_size=self.get_pixel_size(),
             camera_position=tuple(cam_pos),
             light_position=tuple(light_pos),
+            time=now*2,
         )
 
     def info_uniforms(self) -> None:

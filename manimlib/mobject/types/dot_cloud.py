@@ -32,6 +32,13 @@ class DotCloud(PMobject):
         ('rgba', np.float32, (4,)),
     ]
 
+    blink_type_map = {
+        "brightness": 0.0,
+        "hue": 1.0,
+        "saturation": 2.0,
+        "value": 3.0
+    }
+
     def __init__(
         self,
         points: Vect3Array = NULL_POINTS,
@@ -41,12 +48,18 @@ class DotCloud(PMobject):
         glow_factor: float = 0.0,
         anti_alias_width: float = 2.0,
         quad_factor: float = 0.0,  # circle to square factor
+        use_dynamic_color: float = 0.0,
+        blink_factor: float = 0.0,
+        blink_type: str = "brightness",
         **kwargs
     ):
         self.radius = radius
         self.glow_factor = glow_factor
         self.anti_alias_width = anti_alias_width
         self.quad_factor = quad_factor
+        self.use_dynamic_color = use_dynamic_color
+        self.blink_factor = blink_factor
+        self.blink_type = blink_type
 
         super().__init__(
             color=color,
@@ -63,6 +76,9 @@ class DotCloud(PMobject):
         self.uniforms["glow_factor"] = self.glow_factor
         self.uniforms["anti_alias_width"] = self.anti_alias_width
         self.uniforms["quad_factor"] = self.quad_factor
+        self.uniforms["use_dynamic_color"] = self.use_dynamic_color
+        self.uniforms["blink_factor"] = self.blink_factor
+        self.uniforms["blink_type"] = self.blink_type_map[self.blink_type]
 
     def to_grid(
         self,
@@ -146,6 +162,29 @@ class DotCloud(PMobject):
     
     def get_quad_factor(self) -> float:
         return self.uniforms["quad_factor"]
+
+    def set_dynamic_color(self, dynamic_color: float = 1.0) -> Self:
+        dynamic_color = max(0.0, min(1.0, dynamic_color))  # Simplified clamping
+        self.uniforms["use_dynamic_color"] = dynamic_color
+        return self
+
+    def get_dynamic_color(self) -> float:
+        return self.uniforms["use_dynamic_color"]
+
+    def set_blink_factor(self, blink_factor: float = 1.0) -> Self:
+        blink_factor = max(0.0, min(1.0, blink_factor))  # Simplified clamping
+        self.uniforms["blink_factor"] = blink_factor
+        return self
+
+    def get_blink_factor(self) -> float:
+        return self.uniforms["blink_factor"]
+
+    def set_blink_type(self, blink_type: str = "brightness") -> Self:
+        self.uniforms["blink_type"] = self.blink_type_map[blink_type]
+        return self
+
+    def get_blink_type(self) -> float:
+        return self.uniforms["blink_type"]
 
     def compute_bounding_box(self) -> Vect3Array:
         bb = super().compute_bounding_box()
