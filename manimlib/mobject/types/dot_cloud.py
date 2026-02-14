@@ -131,6 +131,13 @@ class DotCloud(PMobject):
     def get_glow_factor(self) -> float:
         return self.uniforms["glow_factor"]
 
+    def set_anti_alias_width(self, anti_alias_width: float = 2.0) -> Self:
+        self.uniforms["anti_alias_width"] = anti_alias_width
+        return self
+
+    def get_anti_alias_width(self) -> float:
+        return self.uniforms["anti_alias_width"]
+
     def set_quad_factor(self, quad_factor: float = 0.0) -> Self:
         """Set shape factor between circle and square."""
         quad_factor = max(0.0, min(1.0, quad_factor))  # Simplified clamping
