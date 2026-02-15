@@ -139,7 +139,7 @@ baskervald_adf_fourier:
     \usepackage{amssymb}
     \usepackage{xcolor}
     \usepackage[upright]{fourier}
-    \usepackage{baskervald}
+    \usepackage{Baskervaldx}
     \usepackage[defaultmathsizes,noasterisk]{mathastext}
 
 baskerville_it:
@@ -155,7 +155,7 @@ baskerville_it:
 
 biolinum:
   description: Biolinum
-  compiler: latex
+  compiler: xelatex
   preamble: |-
     \usepackage{amsmath}
     \usepackage{amssymb}
@@ -183,6 +183,7 @@ brushscriptx:
     \renewcommand{\bfdefault}{xl}
     \usepackage[defaultmathsizes,noasterisk]{mathastext}
     \boldmath
+    \usepackage{lmodern}  % Tambahkan ini
 
 chalkboard_se:
   description: Chalkboard SE
@@ -197,7 +198,7 @@ chalkboard_se:
 
 chalkduster:
   description: Chalkduster
-  compiler: lualatex
+  compiler: xelatex #lualatex
   preamble: |-
     \usepackage{amsmath}
     \usepackage{amssymb}
@@ -351,7 +352,7 @@ electrum_adf:
     \usepackage{xcolor}
     \usepackage[T1]{fontenc}
     \usepackage[LGRgreek,basic,defaultmathsizes]{mathastext}
-    \usepackage[lf]{electrum}
+    \usepackage[lf]{electrum} % electrum.sty tidak ditemukan
     \Mathastext
     \let\varphi\phi
 
@@ -519,7 +520,7 @@ libris_adf_fourier:
     \usepackage{xcolor}
     \usepackage[T1]{fontenc}
     \usepackage[upright]{fourier}
-    \usepackage{libris}
+    \usepackage{libris} % `libris.sty' not found
     \renewcommand{\familydefault}{\sfdefault}
     \usepackage[noasterisk]{mathastext}
 
@@ -574,7 +575,7 @@ new_century_schoolbook_px:
 
 noteworthy_light:
   description: Noteworthy Light
-  compiler: latex
+  compiler: xelatex % asalnya latex
   preamble: |-
     \usepackage{amsmath}
     \usepackage{amssymb}
@@ -614,11 +615,11 @@ romande_adf_fourier_it:
     \usepackage{xcolor}
     \usepackage[T1]{fontenc}
     \usepackage{fourier}
-    \usepackage{romande}
+    \usepackage{romande} % File ini `romandeadf.sty' not found
     \usepackage[italic,defaultmathsizes,noasterisk]{mathastext}
     \renewcommand{\itshape}{\swashstyle}
 
-slitex:
+slitex: # tidak muncul
   description: SliTeX (Euler Greek)
   compiler: latex
   preamble: |-
@@ -681,7 +682,7 @@ venturis_adf_fourier_it:
     \usepackage{amssymb}
     \usepackage{xcolor}
     \usepackage{fourier}
-    \usepackage[lf]{venturis}
+    \usepackage[lf]{venturis} % File `venturis.sty' not found
     \usepackage[italic,defaultmathsizes,noasterisk]{mathastext}
 
 verdana_it:
@@ -705,7 +706,7 @@ vollkorn:
     \usepackage[T1]{fontenc}
     \usepackage{txfonts}
     \usepackage[upright]{txgreeks}
-    \usepackage{vollkorn}
+    \usepackage{vollkorn} % File `vollkorn.sty' not found
     \usepackage[defaultmathsizes]{mathastext}
 
 vollkorn_fourier_it:
@@ -716,7 +717,7 @@ vollkorn_fourier_it:
     \usepackage{amssymb}
     \usepackage{xcolor}
     \usepackage{fourier}
-    \usepackage{vollkorn}
+    \usepackage{vollkorn} % File `vollkorn.sty' not found
     \usepackage[italic,nohbar]{mathastext}
 
 zapf_chancery:
@@ -734,3 +735,23 @@ zapf_chancery:
     \renewcommand\bfdefault\mddefault
     \usepackage[defaultmathsizes]{mathastext}
     \linespread{1.05}
+
+music_template:
+  description: ""
+  compiler: latex
+  preamble: |-
+    \usepackage[english]{babel}
+    \usepackage{amsmath}
+    \usepackage{amssymb}
+    \usepackage{xcolor}
+    \usepackage{musixtex}
+
+times_template:
+  description: ""
+  compiler: xelatex
+  preamble: |-
+    \usepackage[UTF8]{ctex}
+    \usepackage{amsmath}
+    \usepackage{amssymb}
+    \usepackage{xcolor}
+    \usepackage{fontspec}\setmainfont{Times New Roman}
