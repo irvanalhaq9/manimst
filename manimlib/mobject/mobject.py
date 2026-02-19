@@ -1232,8 +1232,9 @@ class Mobject(object):
     def set_z(self, z: float, direction: Vect3 = ORIGIN) -> Self:
         return self.set_coord(z, 2, direction)
 
-    def set_z_index(self, z_index: int) -> Self:
-        self.z_index = z_index
+    def set_z_index(self, z_index: int, recurse=True) -> Self:
+        for mob in self.get_family(recurse):
+            mob.z_index = z_index
         return self
 
     def space_out_submobjects(self, factor: float = 1.5, **kwargs) -> Self:
@@ -1284,6 +1285,14 @@ class Mobject(object):
         self.scale((length + buff) / length)
         return self
 
+    def put_start_on(self, point: Vect3) -> Self:
+        self.shift(point - self.get_start())
+        return self
+
+    def put_end_on(self, point: Vect3) -> Self:
+        self.shift(point - self.get_end())
+        return self
+
     def put_start_and_end_on(self, start: Vect3, end: Vect3) -> Self:
         curr_start, curr_end = self.get_start_and_end()
         curr_vect = curr_end - curr_start
@@ -1324,7 +1333,7 @@ class Mobject(object):
         recurse: bool = True
     ) -> Self:
         """
-        Func should take in a point in R3 and output an rgba value
+        Func should accept an (N, 3) array and return an (N, 4) array of RGB values in [0,1]
         """
         for mob in self.get_family(recurse):
             mob.set_rgba_array(func(mob.get_points()))
@@ -1337,7 +1346,7 @@ class Mobject(object):
         recurse: bool = True
     ) -> Self:
         """
-        Func should take in a point in R3 and output an rgb value
+        Func should accept an (N, 3) array and return an (N, 3) array of RGB values in [0,1]
         """
         for mob in self.get_family(recurse):
             points = mob.get_points()
@@ -1407,7 +1416,7 @@ class Mobject(object):
             self.set_submobject_colors_by_gradient(*colors)
         return self
 
-    def set_submobject_colors_by_gradient(self, *colors: ManimColor) -> Self:
+    def set_submobject_colors_by_gradient(self, *colors: ManimColor, interp_by_hsl=False) -> Self:
         if len(colors) == 0:
             raise Exception("Need at least one color")
         elif len(colors) == 1:
@@ -1415,7 +1424,7 @@ class Mobject(object):
 
         # mobs = self.family_members_with_points()
         mobs = self.submobjects
-        new_colors = color_gradient(colors, len(mobs))
+        new_colors = color_gradient(colors, len(mobs), interp_by_hsl=interp_by_hsl)
 
         for mob, color in zip(mobs, new_colors):
             mob.set_color(color)
