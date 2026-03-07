@@ -26,6 +26,16 @@ def run_scenes():
     # altering global configuration
     scene_config = Dict(manim_config.scene)
     run_config = manim_config.run
+    print("config.py: args.write_file = any([args.write_file, args.open, args.finder]) [see: parse_cli()]")
+    print("config.py: show_in_window = not args.write_file [see: update_run_config()]")
+    print("\033[33mshow_in_window\033[0m:",run_config.show_in_window)
+    print("window_config:",manim_config.window)
+    instance = """\033[91mNOTE\033[0m:
+    1. An instance of a Scene is created in exctract_scene.py by function scene_from_class(), 
+       by passing argument: **scene_config.
+    2. An instance of Window is created in __main__.py if show_in_window = True, 
+       by passing argument: **window_config, then it is included in scene_config."""
+    print(instance)
 
     if run_config.show_in_window:
         # Create a reusable window
@@ -36,6 +46,11 @@ def run_scenes():
         try:
             # Blocking call since a scene may init an IPython shell()
             scenes = manimlib.extract_scene.main(scene_config, run_config)
+            # nama_scenes = [obj.__class__.__name__ for obj in scenes]
+            # print(nama_scenes)
+            print(f"\033[33mscene_config:\033[0m\n{scene_config}")
+            print(f"\033[33mrun_config:\033[0m\n{run_config}\n")
+
             for scene in scenes:
                 scene.run()
             return
