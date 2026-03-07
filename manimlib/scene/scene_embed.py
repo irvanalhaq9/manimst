@@ -3,6 +3,7 @@ from __future__ import annotations
 import inspect
 import pyperclip
 import traceback
+import ast
 
 from IPython.terminal import pt_inputhooks
 from IPython.terminal.embed import InteractiveShellEmbed
@@ -83,6 +84,8 @@ class InteractiveSceneEmbed:
             reload=self.reload_scene,  # Defined below
             remove_last=scene.remove_last,
             mobject_names = scene.mobject_names,
+            count_animations = self.count_animations,
+            list_animations = self.list_animations,
             reload_background = self.reload_background,
             reload_skip = self.reload_skip,
             activate_autoreload = self.activate_autoreload,
@@ -235,6 +238,71 @@ class InteractiveSceneEmbed:
         manim_config.scene.skip_animations = True
         manim_config.scene.preview_while_skipping = False
         self.shell.run_line_magic("exit_raise", "")
+
+    def list_animations(self, return_list=False):
+        """
+        Mengembalikan atau menampilkan daftar self.play dan self.wait dalam Scene yang ditentukan 
+        di manim_config.run.scene_names, termasuk urutan eksekusi dan nomor baris.
+        
+        Jika return_list=True, maka fungsi mengembalikan daftar animasi dalam bentuk list.
+        Jika return_list=False, maka daftar animasi hanya dicetak di layar.
+        """
+        file_name = manim_config.run.file_name
+        scene_names = manim_config.run.scene_names
+        
+        if not scene_names:
+            print("Tidak ada scene yang ditemukan dalam manim_config.run.scene_names.")
+            return [] if return_list else None
+
+        target_scene = scene_names[0]
+
+        with open(file_name, "r", encoding="utf-8") as f:
+            source_code = f.read()
+
+        tree = ast.parse(source_code)
+        animations = []
+
+        for node in tree.body:
+            if isinstance(node, ast.ClassDef) and node.name == target_scene:
+                for subnode in ast.walk(node):
+                    if isinstance(subnode, ast.Call) and isinstance(subnode.func, ast.Attribute):
+                        if subnode.func.attr in ["play", "wait"]:
+                            line_number = subnode.lineno
+                            animation_type = subnode.func.attr
+                            args = [ast.unparse(arg) for arg in subnode.args] if hasattr(ast, 'unparse') else []
+                            animations.append((line_number, animation_type, args))
+
+        animations.sort(key=lambda x: x[0])
+
+        if return_list:
+            return animations  # 🔹 Kembalikan daftar animasi sebagai list
+        else:
+            if animations:
+                print(f"Animations in {target_scene} (in order):")
+                for idx, (line, anim_type, args) in enumerate(animations, start=0):
+                    print(f"{idx}. Line {line}: {anim_type}({', '.join(args)})")
+            else:
+                print("No animation is found.")
+                
+    def count_animations(self):
+        """
+        Menghitung jumlah pemanggilan play dan wait dalam scene yang dipilih,
+        lalu mencetak hasilnya dalam format tertentu.
+        
+        Returns:
+            dict: Dictionary dengan jumlah 'play' dan 'wait'.
+        """
+        animations = self.list_animations(return_list=True)
+        
+        count = {"play": 0, "wait": 0}
+        for _, anim_type, _ in animations:
+            if anim_type in count:
+                count[anim_type] += 1
+        
+        total = sum(count.values())
+        print(f"Total animations: {total}; self.play: {count['play']}, self.wait: {count['wait']}")
+        
+        return count
 
 class CheckpointManager:
     def __init__(self):
