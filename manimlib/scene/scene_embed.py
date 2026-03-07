@@ -154,7 +154,7 @@ class InteractiveSceneEmbed:
             print(f"\nError reading {file_path}: {e}")
             return False
 
-    def reload_scene(self, embed_line: int | None = None, skip: bool = False) -> None:
+    def reload_scene(self, embed_line: int | None = None, skip: bool = False, n: int | None = None) -> None:
         """
         Reloads the scene just like the `manimgl` command would do with the
         same arguments that were provided for the initial startup. This allows
@@ -196,6 +196,23 @@ class InteractiveSceneEmbed:
         manim_config.scene.preview_while_skipping = True
         if skip == TT:
             manim_config.scene.preview_while_skipping = False
+
+        # Handle `n` parameter
+        animations = self.list_animations(return_list=True)
+        if isinstance(n, int):
+            if 0 <= n < len(animations):
+                animation_line = animations[n][0]
+                animation_line_end = self.get_end_line_of_play(manim_config.run.file_name, animation_line)
+                run_config.embed_line = animation_line_end
+            else:
+                print("Animation number out of range. See: list_animations()")
+                self.count_animations()
+                return
+
+        # Note:
+        # reload_scene() hanya bisa dipanggil sendiri. Jika dipanggil bersama
+        # kode lain, maka reload_scene() akan selalu dipanggil terakhir.
+        # Jika mau merun mulai dari animasi ke-n, gunakan run_animation_number()
 
         print("Reloading...")
         self.shell.run_line_magic("exit_raise", "")
