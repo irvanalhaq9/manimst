@@ -81,6 +81,8 @@ class InteractiveSceneEmbed:
             checkpoint_paste=self.checkpoint_paste,
             clear_checkpoints=self.checkpoint_manager.clear_checkpoints,
             reload=self.reload_scene,  # Defined below
+            remove_last=scene.remove_last,
+            mobject_names = scene.mobject_names,
             reload_background = self.reload_background,
             reload_skip = self.reload_skip,
             activate_autoreload = self.activate_autoreload,

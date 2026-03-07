@@ -385,6 +385,15 @@ class Scene(object):
         new_mobjects, _ = recursive_mobject_remove(self.mobjects, to_remove)
         self.mobjects = new_mobjects
 
+    @affects_mobject_list  
+    def remove_last(self):
+        """Remove the last mobject from the scene if it exists."""
+        if self.mobjects:
+            print(f'"{self.mobjects[-1].__class__.__name__}" is removed from the scene')
+            self.remove(self.mobjects[-1])
+        else:
+            print("All mobjects have been removed from the scene")
+
     @affects_mobject_list
     def remove_all_except(self, *mobjects_to_keep : Mobject):
         self.clear()
@@ -407,6 +416,10 @@ class Scene(object):
 
     def get_mobjects(self) -> list[Mobject]:
         return list(self.mobjects)
+
+    def mobject_names(self):
+        """Return a list of class names of all mobjects in the scene."""
+        return [mobj.__class__.__name__ for mobj in self.mobjects]
 
     def get_mobject_copies(self) -> list[Mobject]:
         return [m.copy() for m in self.mobjects]
