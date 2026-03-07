@@ -4,6 +4,7 @@ import inspect
 import pyperclip
 import traceback
 import ast
+import textwrap
 
 from IPython.terminal import pt_inputhooks
 from IPython.terminal.embed import InteractiveShellEmbed
@@ -36,6 +37,7 @@ class InteractiveSceneEmbed:
         self.ensure_flash_on_error()
         if manim_config.embed.autoreload:
             self.auto_reload()
+        self.last_executed_line = None
 
     def launch(self):
         self.shell()
@@ -228,6 +230,69 @@ class InteractiveSceneEmbed:
 
         self.shell.run_line_magic("exit_raise", "")
 
+    def run_animation_number(
+        self,
+        start_index: int | None = None, 
+        end_index: int | None = None,
+        preview: bool = False
+    ):
+        """
+        Menjalankan ulang animasi mulai dari ke-`start_index` hingga ke-`end_index`
+        """
+        if start_index is not None and end_index is None:
+            end_index = start_index + 1  # Menangani input satu angka
+
+        if start_index is None or end_index is None:
+            print("You must provide at least one parameter!")
+            return
+
+        if start_index >= end_index or start_index < 0:
+            print("Wrong input. 'start_index' must be non-negative and smaller than 'end_index'!")
+            return
+        
+        start = start_index + 1
+        end = end_index
+        
+        file_name = manim_config.run.file_name
+        scene_name = manim_config.run.scene_names[0]
+        
+        construct_line = self.get_construct_line(file_name, scene_name)
+        start_line = construct_line  # lines = f.readlines() starts from index 0
+        
+        animations = self.list_animations(return_list=True)
+        for i, anim_data in enumerate(animations[start_index:end_index]):
+            print(start_index + i, anim_data)
+        print("\n")
+        first_animation_line = animations[start - 1][0]
+        lines = self.get_codes(file_name)
+        code_to_run = "".join(lines[start_line:first_animation_line-1])
+        dedented_code = textwrap.dedent(code_to_run) # Remove unnecessary indentation
+        
+        # this will handle all animations before the chosen animations
+        manim_config.scene.preview_while_skipping = preview
+        manim_config.run.is_reload = True
+        # the code below is important for a reset because after the frame manipulation, 
+        # especially after using 3D scene, the settings will remain.
+        self.scene.clear()
+        fovy: float = 45 * DEG # see: CameraFrame __init__
+        self.scene.frame.to_default_state()
+        self.scene.frame.set_field_of_view(fovy)
+        self.scene.always_depth_test = True
+        with self.scene.temp_config_change(skip=True, record=False, progress_bar=True):
+            self.shell.run_cell(dedented_code)
+
+        # Now, it will handle the chosen animations
+        last_animation_line = animations[end - 1][0]
+        last_animation_start = last_animation_line
+        last_animation_end = self.get_end_line_of_play(file_name, last_animation_start)
+        code_to_run_ = "".join(lines[first_animation_line-1:last_animation_end])
+        dedented_code_ = textwrap.dedent(code_to_run_) # Remove unnecessary indentation
+        
+        with self.scene.temp_config_change(skip=False, record=False, progress_bar=True):
+            self.shell.run_cell(dedented_code_)
+            
+        self.last_executed_line = last_animation_end - 1
+
     def auto_reload(self):
         """Enables reload the shell's module before all calls"""
         def pre_cell_func(*args, **kwargs):
@@ -315,6 +380,44 @@ class InteractiveSceneEmbed:
         print(f"Total animations: {total}; self.play: {count['play']}, self.wait: {count['wait']}")
         
         return count
+
+    def get_codes(self, file_name):
+        """
+        Membaca isi file dan mengembalikan daftar baris.
+        """
+        with open(file_name, "r", encoding="utf-8") as f:
+            return f.readlines()
+
+    def get_construct_line(self, file_name, scene_name):
+        """
+        Mengembalikan nomor baris di mana metode construct dideklarasikan dalam scene tertentu.
+        """
+        
+        lines = self.get_codes(file_name)
+        source_code = "".join(lines)  # Gabungkan kembali menjadi string
+        tree = ast.parse(source_code)
+
+        for node in tree.body:
+            if isinstance(node, ast.ClassDef) and node.name == scene_name:
+                for subnode in node.body:
+                    if isinstance(subnode, ast.FunctionDef) and subnode.name == "construct":
+                        return subnode.lineno  # Nomor baris `construct`
+        
+        return None  # Jika tidak 
+
+    def get_end_line_of_play(self, file_name, start_line: int):
+        """Menentukan baris akhir dari self.play() yang dimulai pada start_line menggunakan AST."""
+        
+        lines = self.get_codes(file_name)
+        source_code = "".join(lines)  # Gabungkan kembali menjadi string
+        tree = ast.parse(source_code)
+        
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Expr):  # Mencari ekspresi seperti self.play(...)
+                if hasattr(node, "lineno") and node.lineno == start_line:
+                    if hasattr(node, "end_lineno"):  # Python 3.8+
+                        return node.end_lineno  # Baris akhir yang akurat
+        return start_line  # Jika tidak ditemukan, anggap hanya 1 baris
 
 class CheckpointManager:
     def __init__(self):
