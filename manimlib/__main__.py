@@ -42,7 +42,10 @@ def run_scenes():
         except KillEmbedded:
             # Requested via the `exit_raise` IPython runline magic
             # by means of the reload_scene() command
-            pass
+            scene_config.skip_animations = manim_config.scene.skip_animations
+            scene_config.preview_while_skipping = manim_config.scene.preview_while_skipping
+            # skip_animations and preview_while_skipping can be changed during reload_scene() or others
+            # pass
         except KeyboardInterrupt:
             break
 
