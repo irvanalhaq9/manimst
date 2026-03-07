@@ -255,7 +255,7 @@ class InteractiveSceneEmbed:
         # Konfigurasi ulang Manim
         manim_config.run.embed_line = end_line
         manim_config.scene.start_at_animation_number = start
-        manim_config.scene.skip_animations = True
+        manim_config.scene.skip_animations = False
         manim_config.scene.preview_while_skipping = preview
         
         if start+1 == end:
