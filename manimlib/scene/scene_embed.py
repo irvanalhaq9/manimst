@@ -88,6 +88,7 @@ class InteractiveSceneEmbed:
             list_animations = self.list_animations,
             reload_background = self.reload_background,
             reload_skip = self.reload_skip,
+            reload_script = self.reload_script,
             activate_autoreload = self.activate_autoreload,
         )
 
@@ -214,6 +215,16 @@ class InteractiveSceneEmbed:
         manim_config.scene.preview_while_skipping = False
         log.warning("This will NOT change background_color for rendering video.")
         log.warning("Use flag: -c [color] or custom_config.yml instead!")
+        self.shell.run_line_magic("exit_raise", "")
+
+    def reload_script(self, this_scene: bool=False) -> None:
+        if this_scene:
+            scene = [self.scene.__class__.__name__]
+            manim_config.run.scene_names = scene
+        else:
+            manim_config.run.embed_line = None
+            manim_config.run.scene_names = []
+
         self.shell.run_line_magic("exit_raise", "")
 
     def auto_reload(self):
