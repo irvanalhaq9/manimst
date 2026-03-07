@@ -60,6 +60,7 @@ def run_scenes():
             scene_config.skip_animations = manim_config.scene.skip_animations
             scene_config.preview_while_skipping = manim_config.scene.preview_while_skipping
             # skip_animations and preview_while_skipping can be changed during reload_scene() or others
+            scene_config.start_at_animation_number = manim_config.scene.start_at_animation_number
             # pass
         except KeyboardInterrupt:
             break

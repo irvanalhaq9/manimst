@@ -91,6 +91,7 @@ class InteractiveSceneEmbed:
             reload_background = self.reload_background,
             reload_skip = self.reload_skip,
             reload_script = self.reload_script,
+            reload_animation_number = self.reload_animation_number,
             run_animation_number = self.run_animation_number,
             activate_autoreload = self.activate_autoreload,
         )
@@ -229,6 +230,42 @@ class InteractiveSceneEmbed:
             manim_config.run.embed_line = None
             manim_config.run.scene_names = []
 
+        self.shell.run_line_magic("exit_raise", "")
+
+    def reload_animation_number(self, start: int = 0, end: int | None = None, preview: bool = False) -> None:
+        """
+        Plays animations from start to end-1.
+
+        Parameters:
+        - start: The starting animation index.
+        - end: The ending animation index (not inclusive). If None, plays only start.
+        - preview: If True, shows a preview of skipped animations.
+        """
+        if end is None:
+            end = start + 1  # Default to playing only one animation
+        if end is not None and start >= end:
+            print("'end' must be bigger than 'start'!")
+            return
+        animations = self.list_animations(return_list=True)
+        end_line = max(
+            self.get_end_line_of_play(manim_config.run.file_name, animations[i][0])
+            for i in range(start, end)
+        )
+
+        # Konfigurasi ulang Manim
+        manim_config.run.embed_line = end_line
+        manim_config.scene.start_at_animation_number = start
+        manim_config.scene.skip_animations = True
+        manim_config.scene.preview_while_skipping = preview
+        
+        if start+1 == end:
+            print(start,animations[start])
+            print(f"Playing animations {start} {'with preview' if preview else ''}...")
+        else:
+            print(start,animations[start])
+            print("⋮   ⋮     ⋮      ⋮")
+            print(end-1,animations[end-1])
+            print(f"Playing animations {start} to {end - 1} {'with preview' if preview else ''}...")
         self.shell.run_line_magic("exit_raise", "")
 
     def run_animation_number(
