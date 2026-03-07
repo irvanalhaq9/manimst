@@ -9,7 +9,7 @@ from IPython.terminal.embed import InteractiveShellEmbed
 
 from manimlib.animation.fading import VFadeInThenOut
 from manimlib.config import manim_config
-from manimlib.constants import RED
+from manimlib.constants import RED, DEG, T, F, TT
 from manimlib.logger import log
 from manimlib.mobject.mobject import Mobject
 from manimlib.mobject.frame import FullScreenRectangle
@@ -143,7 +143,7 @@ class InteractiveSceneEmbed:
             print(f"\nError reading {file_path}: {e}")
             return False
 
-    def reload_scene(self, embed_line: int | None = None) -> None:
+    def reload_scene(self, embed_line: int | None = None, skip: bool = False) -> None:
         """
         Reloads the scene just like the `manimgl` command would do with the
         same arguments that were provided for the initial startup. This allows
@@ -180,7 +180,11 @@ class InteractiveSceneEmbed:
         if embed_line:
             run_config.embed_line = embed_line
 
-        manim_config.scene.skip_animations = False
+        # skipping
+        manim_config.scene.skip_animations = bool(skip)
+        if skip == TT:
+            manim_config.scene.preview_while_skipping = False
+
         print("Reloading...")
         self.shell.run_line_magic("exit_raise", "")
 
@@ -210,7 +214,7 @@ class InteractiveSceneEmbed:
         log.warning("Use flag: -c [color] or custom_config.yml instead!")
         self.shell.run_line_magic("exit_raise", "")
 
-    def reload_skip(self, embed_line: int | None = None, preview: bool = True) -> None:
+    def reload_skip(self, embed_line: int | None = None, preview: bool = False) -> None:
         # Update the global run configuration.
         manim_config.scene.skip_animations = True
         manim_config.scene.preview_while_skipping = preview
