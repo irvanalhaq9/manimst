@@ -188,6 +188,29 @@ class InteractiveSceneEmbed:
         print("Reloading...")
         self.shell.run_line_magic("exit_raise", "")
 
+    def reload_skip(self, embed_line: int | None = None, preview: bool = False) -> None:
+        # Update the global run configuration.
+        manim_config.scene.skip_animations = True
+        manim_config.scene.preview_while_skipping = preview
+        manim_config.run.is_reload = True
+        if embed_line:
+            manim_config.run.embed_line = embed_line
+        print("Reloading...")
+        if preview:
+            print("Skipping with preview")
+        else:
+            print("Skipping without preview")
+        self.shell.run_line_magic("exit_raise", "")
+
+    def reload_background(self, color: ManimColor, opacity: float = 1.0) -> None:
+        manim_config.camera.background_color = color
+        manim_config.camera.background_opacity = opacity
+        manim_config.scene.skip_animations = True
+        manim_config.scene.preview_while_skipping = False
+        log.warning("This will NOT change background_color for rendering video.")
+        log.warning("Use flag: -c [color] or custom_config.yml instead!")
+        self.shell.run_line_magic("exit_raise", "")
+
     def auto_reload(self):
         """Enables reload the shell's module before all calls"""
         def pre_cell_func(*args, **kwargs):
@@ -204,29 +227,6 @@ class InteractiveSceneEmbed:
     ):
         with self.scene.temp_config_change(skip, record, progress_bar):
             self.checkpoint_manager.checkpoint_paste(self.shell, self.scene)
-
-    def reload_background(self, color: ManimColor, opacity: float = 1.0) -> None:
-        manim_config.camera.background_color = color
-        manim_config.camera.background_opacity = opacity
-        manim_config.scene.skip_animations = True
-        manim_config.scene.preview_while_skipping = False
-        log.warning("This will NOT change background_color for rendering video.")
-        log.warning("Use flag: -c [color] or custom_config.yml instead!")
-        self.shell.run_line_magic("exit_raise", "")
-
-    def reload_skip(self, embed_line: int | None = None, preview: bool = False) -> None:
-        # Update the global run configuration.
-        manim_config.scene.skip_animations = True
-        manim_config.scene.preview_while_skipping = preview
-        manim_config.run.is_reload = True
-        if embed_line:
-            manim_config.run.embed_line = embed_line
-        print("Reloading...")
-        if preview:
-            print("Skipping with preview")
-        else:
-            print("Skipping without preview")
-        self.shell.run_line_magic("exit_raise", "")
 
     def activate_autoreload(self, autoreload: bool = True) -> None:
         manim_config.embed.autoreload = autoreload
