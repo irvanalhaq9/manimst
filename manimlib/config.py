@@ -224,6 +224,11 @@ def parse_cli():
             help="Automatically reload Python modules to pick up code changes " +
                  "across different files",
         )
+        parser.add_argument(
+            "--extract_anim",
+            action="store_true",
+            help="Counts and Lists all animations in a scene "
+        )
         args = parser.parse_args()
         args.write_file = any([args.write_file, args.open, args.finder])
         return args
