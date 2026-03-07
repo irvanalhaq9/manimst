@@ -93,6 +93,7 @@ class InteractiveSceneEmbed:
             reload_script = self.reload_script,
             reload_animation_number = self.reload_animation_number,
             run_animation_number = self.run_animation_number,
+            continue_run = self.continue_run,
             activate_autoreload = self.activate_autoreload,
         )
 
@@ -330,6 +331,82 @@ class InteractiveSceneEmbed:
             self.shell.run_cell(dedented_code_)
             
         self.last_executed_line = last_animation_end - 1
+
+    def continue_run(self, start: int | None = None, end: int | None = None, n: int | None = None):
+        """
+        Executes the code from the last executed line (or embed_line if first execution)
+        until `end` (or the end of the file if not specified).
+        """
+        file_name = manim_config.run.file_name
+        embed_line = manim_config.run.embed_line
+
+        lines = self.get_codes(file_name) # Code lines (0-based index)
+        animations = self.list_animations(return_list=True)
+
+        if start is None:
+            if self.last_executed_line is not None:
+                start = self.last_executed_line + 1 # Start from the next line after the last execution
+            else:
+                start = embed_line  
+        else:
+            if start <= embed_line:
+                print(f"Cannot execute.")
+                print(f"Parameter 'from_line' must be bigger than {embed_line}, the embed line.")
+                return
+            if self.last_executed_line is not None and start <= self.last_executed_line + 1:
+                print("Cannot execute.")
+                print(f"Parameter 'from_line' must be bigger than {self.last_executed_line + 1}, the last executed line.")
+                return
+            start -= 1 # Convert 1-based user input to 0-based index for slicing
+            
+        if n:
+            animation_line = animations[n][0]
+            animation_line_end = self.get_end_line_of_play(manim_config.run.file_name, animation_line)
+
+            if end is None:
+                end = animation_line_end
+            else:
+                end = max(end, animation_line_end)
+
+        last_animation_line = animations[-1][0]
+        last_animation_line_end = self.get_end_line_of_play(manim_config.run.file_name, last_animation_line)
+        if end is None:
+            end = last_animation_line_end
+        if end > last_animation_line_end:
+            print(f"Out of range! Last line is: {last_animation_line_end}")
+            return
+
+        if self.last_executed_line is not None and end <= self.last_executed_line + 1:
+            print(f"Cannot execute. Parameter 'to_line' must be bigger than {self.last_executed_line + 1}, the last executed line.")
+            print(f"If you want to re-execute to that line, use: reload({end})")
+            return
+        if end <= embed_line:
+            print(f"Cannot execute. Parameter 'to_line' must be bigger than {embed_line}, the embed line.")
+            print(f"If you want to re-execute to that line, use: reload({end})")
+            return
+
+        detected_animations = [
+            (idx, line, anim_type, args)
+            for idx, (line, anim_type, args) in enumerate(animations)
+            if start + 1 <= line <= end  # Convert back to 1-based for comparison
+        ]
+
+        if detected_animations:
+            print("Detected animations:")
+            for idx, line, anim_type, args in detected_animations:
+                print(f"{idx}. Line {line}: {anim_type}({', '.join(args)})")
+
+        code_to_run = "".join(lines[start:end]) # Slicing is naturally 0-based
+        dedented_code = textwrap.dedent(code_to_run)
+
+        if start + 1 == end:
+            print(f"Executing line {start + 1}...\n")
+        else:
+            print(f"Executing lines {start + 1} to {end}...\n") # Convert back to 1-based for display
+        
+        with self.scene.temp_config_change(skip=False, record=False, progress_bar=True):
+            self.shell.run_cell(dedented_code)
+        self.last_executed_line = end - 1  # Store the last executed line (0-based index)
 
     def auto_reload(self):
         """Enables reload the shell's module before all calls"""
