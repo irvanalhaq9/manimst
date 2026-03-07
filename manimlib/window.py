@@ -196,6 +196,8 @@ class Window(PygletWindow):
 
     @note_undrawn_event
     def on_key_press(self, symbol: int, modifiers: int) -> None:
+        print("Ini Window.on_key_press() di window.py") # dipanggil setiap kali tekan keyboard saat window sudah diklik
+        print("(symbol, modifiers)", (symbol, modifiers))
         self.pressed_keys.add(symbol)  # Modifiers?
         super().on_key_press(symbol, modifiers)
         if not self.scene:
@@ -204,6 +206,8 @@ class Window(PygletWindow):
 
     @note_undrawn_event
     def on_key_release(self, symbol: int, modifiers: int) -> None:
+        print("Ini Window.on_key_release() di window.py")
+        print("(symbol, modifiers)", (symbol, modifiers))
         self.pressed_keys.difference_update({symbol})  # Modifiers?
         super().on_key_release(symbol, modifiers)
         if not self.scene:
