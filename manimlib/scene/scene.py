@@ -246,8 +246,12 @@ class Scene(object):
             # In this case, there's no need for new rendering, but we
             # shoudl still listen for new events
             self.window._window.dispatch_events()
+            # print("Scene.update_frame() dipanggil") # WARNING: Ini dirun terus, meskipun tidak ada aktivitas!
             return
 
+        # print("Ini dalam Scene.update_frame()") # Ini dirun jika ada aktivitas
+        # seperti menggerakkan kursor pada window 
+        # atau saat tekan tombol atau eksekusi perintah di ipython
         self.camera.capture(*self.render_groups)
 
         if self.window and not self.skip_animations:
