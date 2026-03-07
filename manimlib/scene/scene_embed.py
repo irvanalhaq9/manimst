@@ -91,6 +91,7 @@ class InteractiveSceneEmbed:
             reload_background = self.reload_background,
             reload_skip = self.reload_skip,
             reload_script = self.reload_script,
+            run_animation_number = self.run_animation_number,
             activate_autoreload = self.activate_autoreload,
         )
 
