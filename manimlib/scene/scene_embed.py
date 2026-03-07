@@ -188,6 +188,7 @@ class InteractiveSceneEmbed:
 
         # skipping
         manim_config.scene.skip_animations = bool(skip)
+        manim_config.scene.preview_while_skipping = True
         if skip == TT:
             manim_config.scene.preview_while_skipping = False
 
