@@ -95,7 +95,11 @@ class InteractiveSceneEmbed:
             run_animation_number = self.run_animation_number,
             continue_run = self.continue_run,
             activate_autoreload = self.activate_autoreload,
+            shortcuts = self.shortcuts,
         )
+        
+    def shortcuts(self):
+        return list(self.get_shortcuts().keys())
 
     def enable_gui(self):
         """Enables gui interactions during the embed"""
