@@ -417,7 +417,7 @@ class Scene(object):
     def get_mobjects(self) -> list[Mobject]:
         return list(self.mobjects)
 
-    def mobject_names(self):
+    def screen_mobjects(self):
         """Return a list of class names of all mobjects in the scene."""
         return [mobj.__class__.__name__ for mobj in self.mobjects]
 
