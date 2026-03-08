@@ -245,6 +245,12 @@ class InteractiveSceneEmbed:
         self.shell.run_line_magic("exit_raise", "")
 
     def reload_script(self, this_scene: bool=False) -> None:
+        """
+        This is used when there are multiple scene classes in a module,
+        and we want to be able to choose which one to run like when we run:
+            manimgl module.py
+        if `this_scene` is True, this will only reload the active scene.
+        """
         if this_scene:
             scene = [self.scene.__class__.__name__]
             manim_config.run.scene_names = scene
