@@ -252,11 +252,11 @@ class InteractiveSceneEmbed:
         if `this_scene` is True, this will only reload the active scene.
         """
         if this_scene:
-            scene = [self.scene.__class__.__name__]
-            manim_config.run.scene_names = scene
+            manim_config.run.scene_names = [self.scene.__class__.__name__]
         else:
             manim_config.run.embed_line = None
             manim_config.run.scene_names = []
+            manim_config.scene.start_at_animation_number = None
 
         self.shell.run_line_magic("exit_raise", "")
 
@@ -315,20 +315,20 @@ class InteractiveSceneEmbed:
         if start_index >= end_index or start_index < 0:
             print("Wrong input. 'start_index' must be non-negative and smaller than 'end_index'!")
             return
-        
+
         start = start_index + 1
         end = end_index
-        
+
+        animations = self.list_animations(return_list=True) # this also ensures there scene_name not None 
         file_name = manim_config.run.file_name
         scene_name = manim_config.run.scene_names[0]
-        
+
         construct_line = self.get_construct_line(file_name, scene_name)
         start_line = construct_line  # lines = f.readlines() starts from index 0
-        
-        animations = self.list_animations(return_list=True)
+
         for i, anim_data in enumerate(animations[start_index:end_index]):
             print(start_index + i, anim_data)
-        print("\n")
+
         first_animation_line = animations[start - 1][0]
         lines = self.get_codes(file_name)
         code_to_run = "".join(lines[start_line:first_animation_line-1])
