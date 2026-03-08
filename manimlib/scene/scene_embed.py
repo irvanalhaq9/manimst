@@ -466,15 +466,15 @@ class InteractiveSceneEmbed:
         Jika return_list=True, maka fungsi mengembalikan daftar animasi dalam bentuk list.
         Jika return_list=False, maka daftar animasi hanya dicetak di layar.
         """
+        if not manim_config.run.file_name:
+            print("This is BlankScene, no animations here!")
+            return
         file_name = manim_config.run.file_name
-        scene_names = manim_config.run.scene_names or [self.scene.__class__.__name__]
-        if scene_names == [self.scene.__class__.__name__]:
-            manim_config.run.scene_names = scene_names
-        if not scene_names:
-            print("Tidak ada scene yang ditemukan dalam manim_config.run.scene_names.")
-            return [] if return_list else None
 
-        target_scene = scene_names[0]
+        if not manim_config.run.scene_names:
+            manim_config.run.scene_names = [self.scene.__class__.__name__]
+
+        target_scene = manim_config.run.scene_names[0]
 
         with open(file_name, "r", encoding="utf-8") as f:
             source_code = f.read()
