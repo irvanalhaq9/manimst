@@ -213,6 +213,9 @@ class InteractiveSceneEmbed:
                 self.count_animations()
                 return
 
+        # Ensure animations start from the beginning
+        manim_config.scene.start_at_animation_number = None
+
         # Note:
         # reload_scene() hanya bisa dipanggil sendiri. Jika dipanggil bersama
         # kode lain, maka reload_scene() akan selalu dipanggil terakhir.
