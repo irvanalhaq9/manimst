@@ -38,6 +38,7 @@ class InteractiveSceneEmbed:
         if manim_config.embed.autoreload:
             self.auto_reload()
         self.last_executed_line = None
+        self.last_animation_number = None
 
     def launch(self):
         self.shell()
@@ -94,6 +95,7 @@ class InteractiveSceneEmbed:
             reload_animation_number = self.reload_animation_number,
             run_animation_number = self.run_animation_number,
             continue_run = self.continue_run,
+            run_next_animation = self.run_next_animation,
             activate_autoreload = self.activate_autoreload,
             shortcuts = self.list_shortcuts,
         )
@@ -361,6 +363,7 @@ class InteractiveSceneEmbed:
             self.shell.run_cell(dedented_code_)
             
         self.last_executed_line = last_animation_end - 1
+        self.last_animation_number = end - 1
 
     def continue_run(self, start: int | None = None, end: int | None = None, n: int | None = None):
         """
@@ -389,7 +392,7 @@ class InteractiveSceneEmbed:
                 return
             start -= 1 # Convert 1-based user input to 0-based index for slicing
             
-        if n:
+        if n is not None:
             animation_line = animations[n][0]
             animation_line_end = self.get_end_line_of_play(manim_config.run.file_name, animation_line)
 
@@ -398,6 +401,7 @@ class InteractiveSceneEmbed:
             else:
                 end = max(end, animation_line_end)
 
+        # ensure the last line does not exceed at the end of construct method
         last_animation_line = animations[-1][0]
         last_animation_line_end = self.get_end_line_of_play(manim_config.run.file_name, last_animation_line)
         if end is None:
@@ -437,6 +441,31 @@ class InteractiveSceneEmbed:
         with self.scene.temp_config_change(skip=False, record=False, progress_bar=True):
             self.shell.run_cell(dedented_code)
         self.last_executed_line = end - 1  # Store the last executed line (0-based index)
+        if n is not None:
+            self.last_animation_number = n
+
+    def run_next_animation(self):
+        """
+        This can only be run after methods that spefify animation number,
+        like: continue_run(n=...) and run_animation_number
+        """
+        if self.last_animation_number is None:
+            return
+        animations = self.list_animations(return_list=True)
+        last_number = self.last_animation_number
+
+        if last_number >= len(animations)-1:
+            print("That was the last animation!")
+            return
+        if animations[last_number+1][1] == "wait":
+            new_number = last_number + 2
+            if new_number == len(animations):
+                new_number = last_number + 1
+                print("This is the last animation!")
+        else:
+            new_number = last_number + 1
+
+        self.continue_run(n=new_number)
 
     def auto_reload(self):
         """Enables reload the shell's module before all calls"""
