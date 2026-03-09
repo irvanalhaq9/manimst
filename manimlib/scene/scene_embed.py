@@ -381,11 +381,11 @@ class InteractiveSceneEmbed:
         else:
             if start <= embed_line:
                 print(f"Cannot execute.")
-                print(f"Parameter 'from_line' must be bigger than {embed_line}, the embed line.")
+                print(f"Parameter 'start' must be bigger than {embed_line}, the embed line.")
                 return
             if self.last_executed_line is not None and start <= self.last_executed_line + 1:
                 print("Cannot execute.")
-                print(f"Parameter 'from_line' must be bigger than {self.last_executed_line + 1}, the last executed line.")
+                print(f"Parameter 'start' must be bigger than {self.last_executed_line + 1}, the last executed line.")
                 return
             start -= 1 # Convert 1-based user input to 0-based index for slicing
             
@@ -407,11 +407,11 @@ class InteractiveSceneEmbed:
             return
 
         if self.last_executed_line is not None and end <= self.last_executed_line + 1:
-            print(f"Cannot execute. Parameter 'to_line' must be bigger than {self.last_executed_line + 1}, the last executed line.")
+            print(f"Cannot execute. Parameter 'end' must be bigger than {self.last_executed_line + 1}, the last executed line.")
             print(f"If you want to re-execute to that line, use: reload({end})")
             return
         if end <= embed_line:
-            print(f"Cannot execute. Parameter 'to_line' must be bigger than {embed_line}, the embed line.")
+            print(f"Cannot execute. Parameter 'end' must be bigger than {embed_line}, the embed line.")
             print(f"If you want to re-execute to that line, use: reload({end})")
             return
 
