@@ -448,10 +448,23 @@ class InteractiveSceneEmbed:
     def run_next_animation(self):
         """
         This can only be run after methods that spefify animation number,
-        like: continue_run(n=...) and run_animation_number
+        like: continue_run(n=...) and run_animation_number,
+        or after reload or embed at an animation line
         """
         if self.last_animation_number is None:
+            embed_line = manim_config.run.embed_line
+            # this code makes `run_next_animation()` work 
+            # after `reload(e=...)`, `reload(n=...)`, or
+            # `reload_animation_number()`
+            ## NOTE: always insert an embed line at the animation line!
+            if embed_line:
+                anim_lines = self.list_animation_lines()
+                import bisect
+                # this will give the index of the lowest number that greater than embed_line
+                idx = bisect.bisect_right(anim_lines, embed_line)
+                self.continue_run(n=idx)
             return
+
         animations = self.list_animations(return_list=True)
         last_number = self.last_animation_number
 
