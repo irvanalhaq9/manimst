@@ -700,7 +700,15 @@ class InteractiveDevelopment(InteractiveScene):
         always(circle.move_to, self.mouse_point)
 
 
-class ControlsExample(InteractiveScene):
+class ControlsExample(Scene):
+    # Jika menggunakan InteractiveScene, maka di dalam method setup()
+    # harus segera memanggil super().setup()
+    # contoh:
+    # def setup(self):
+    #     super().setup()
+    #     self.textbox = Textbox()
+    #     ...
+
     drag_to_pan = False
 
     def setup(self):
