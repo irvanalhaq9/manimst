@@ -98,8 +98,9 @@ class InteractiveSceneEmbed:
             run_next_animation = self.run_next_animation,
             activate_autoreload = self.activate_autoreload,
             shortcuts = self.list_shortcuts,
+            list_animation_lines = self.list_animation_lines,
         )
-        
+
     def list_shortcuts(self):
         return list(self.get_shortcuts().keys())
 
@@ -290,7 +291,7 @@ class InteractiveSceneEmbed:
         manim_config.scene.start_at_animation_number = start
         manim_config.scene.skip_animations = False
         manim_config.scene.preview_while_skipping = preview
-        
+
         if start+1 == end:
             print(start,animations[start])
             print(f"Playing animations {start} {'with preview' if preview else ''}...")
@@ -338,7 +339,7 @@ class InteractiveSceneEmbed:
         lines = self.get_codes(file_name)
         code_to_run = "".join(lines[start_line:first_animation_line-1])
         dedented_code = textwrap.dedent(code_to_run) # Remove unnecessary indentation
-        
+
         # this will handle all animations before the chosen animations
         manim_config.scene.preview_while_skipping = preview
         manim_config.run.is_reload = True
@@ -358,10 +359,10 @@ class InteractiveSceneEmbed:
         last_animation_end = self.get_end_line_of_play(file_name, last_animation_start)
         code_to_run_ = "".join(lines[first_animation_line-1:last_animation_end])
         dedented_code_ = textwrap.dedent(code_to_run_) # Remove unnecessary indentation
-        
+
         with self.scene.temp_config_change(skip=False, record=False, progress_bar=True):
             self.shell.run_cell(dedented_code_)
-            
+
         self.last_executed_line = last_animation_end - 1
         self.last_animation_number = end - 1
 
@@ -391,7 +392,7 @@ class InteractiveSceneEmbed:
                 print(f"Parameter 'start' must be bigger than {self.last_executed_line + 1}, the last executed line.")
                 return
             start -= 1 # Convert 1-based user input to 0-based index for slicing
-            
+
         if n is not None:
             animation_line = animations[n][0]
             animation_line_end = self.get_end_line_of_play(manim_config.run.file_name, animation_line)
@@ -437,7 +438,7 @@ class InteractiveSceneEmbed:
             print(f"Executing line {start + 1}...\n")
         else:
             print(f"Executing lines {start + 1} to {end}...\n") # Convert back to 1-based for display
-        
+
         with self.scene.temp_config_change(skip=False, record=False, progress_bar=True):
             self.shell.run_cell(dedented_code)
         self.last_executed_line = end - 1  # Store the last executed line (0-based index)
@@ -535,7 +536,44 @@ class InteractiveSceneEmbed:
                     print(f"{idx}. Line {line}: {anim_type}({', '.join(args)})")
             else:
                 print("No animation is found.")
-                
+
+    def list_animation_lines(self):
+        """
+        Mengembalikan list nomor baris dari semua self.play() dan self.wait()
+        tanpa menghitung comment.
+        """
+
+        if not manim_config.run.file_name:
+            return []
+
+        file_name = manim_config.run.file_name
+
+        if not manim_config.run.scene_names:
+            manim_config.run.scene_names = [self.scene.__class__.__name__]
+
+        target_scene = manim_config.run.scene_names[0]
+
+        with open(file_name, "r", encoding="utf-8") as f:
+            source = f.read()
+
+        tree = ast.parse(source)
+
+        lines = []
+
+        for node in tree.body:
+            if isinstance(node, ast.ClassDef) and node.name == target_scene:
+
+                for subnode in ast.walk(node):
+
+                    if (
+                        isinstance(subnode, ast.Call)
+                        and isinstance(subnode.func, ast.Attribute)
+                        and subnode.func.attr in ("play", "wait")
+                    ):
+                        lines.append(subnode.lineno)
+
+        return sorted(lines)
+
     def count_animations(self):
         """
         Menghitung jumlah pemanggilan play dan wait dalam scene yang dipilih,
@@ -545,15 +583,15 @@ class InteractiveSceneEmbed:
             dict: Dictionary dengan jumlah 'play' dan 'wait'.
         """
         animations = self.list_animations(return_list=True)
-        
+
         count = {"play": 0, "wait": 0}
         for _, anim_type, _ in animations:
             if anim_type in count:
                 count[anim_type] += 1
-        
+
         total = sum(count.values())
         print(f"Total animations: {total}; self.play: {count['play']}, self.wait: {count['wait']}")
-        
+
         return count
 
     def get_codes(self, file_name):
@@ -567,7 +605,7 @@ class InteractiveSceneEmbed:
         """
         Mengembalikan nomor baris di mana metode construct dideklarasikan dalam scene tertentu.
         """
-        
+
         lines = self.get_codes(file_name)
         source_code = "".join(lines)  # Gabungkan kembali menjadi string
         tree = ast.parse(source_code)
@@ -577,16 +615,16 @@ class InteractiveSceneEmbed:
                 for subnode in node.body:
                     if isinstance(subnode, ast.FunctionDef) and subnode.name == "construct":
                         return subnode.lineno  # Nomor baris `construct`
-        
+
         return None  # Jika tidak 
 
     def get_end_line_of_play(self, file_name, start_line: int):
         """Menentukan baris akhir dari self.play() yang dimulai pada start_line menggunakan AST."""
-        
+
         lines = self.get_codes(file_name)
         source_code = "".join(lines)  # Gabungkan kembali menjadi string
         tree = ast.parse(source_code)
-        
+
         for node in ast.walk(tree):
             if isinstance(node, ast.Expr):  # Mencari ekspresi seperti self.play(...)
                 if hasattr(node, "lineno") and node.lineno == start_line:
