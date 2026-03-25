@@ -75,13 +75,21 @@ def extract_anim(file_name=None, scene_name=None):
         return
     
     if not scene_name:
-        print("Error: No scene name provided. Please input a scene name!")
         classes = extract_classes(file_name)
         if classes:
-            print(f"Available classes in {file_name}:", ", ".join(classes))
-            print(f"Example: manimgl {file_name} {classes[-1]} --extract_anim")
+            n = len(classes)
+            if n == 1:
+                scene_name = classes[0]
+                print(f"One scene is found: {scene_name}")
+                count_animations(file_name, scene_name)
+                list_animations(file_name, scene_name)
+            else:
+                print("Cannot extract animations. Please input a scene name!")
+                print(f"Available classes in {file_name}:", ", ".join(classes))
+                print(f"Example: manimgl {file_name} {classes[-1]} --extract_anim")
         else:
             print("No classes found in the file.")
+
         return
     
     scene_name = scene_name[0]
