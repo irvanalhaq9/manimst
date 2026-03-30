@@ -99,6 +99,7 @@ class InteractiveSceneEmbed:
             activate_autoreload = self.activate_autoreload,
             shortcuts = self.list_shortcuts,
             list_animation_lines = self.list_animation_lines,
+            end_of_play_lines = self.end_of_play_lines,
         )
 
     def list_shortcuts(self):
@@ -442,6 +443,12 @@ class InteractiveSceneEmbed:
         with self.scene.temp_config_change(skip=False, record=False, progress_bar=True):
             self.shell.run_cell(dedented_code)
         self.last_executed_line = end - 1  # Store the last executed line (0-based index)
+
+        end_play_lines = self.end_of_play_lines()
+        if self.last_executed_line in end_play_lines:
+            idx = end_play_lines.index(self.last_executed_line)
+            if self.last_animation_number is None or idx > self.last_animation_number:
+                self.last_animation_number = idx
         if n is not None:
             self.last_animation_number = n
 
@@ -644,6 +651,14 @@ class InteractiveSceneEmbed:
                     if hasattr(node, "end_lineno"):  # Python 3.8+
                         return node.end_lineno  # Baris akhir yang akurat
         return start_line  # Jika tidak ditemukan, anggap hanya 1 baris
+
+    def end_of_play_lines(self):
+        file_name = manim_config.run.file_name
+        return [
+            self.get_end_line_of_play(file_name, line)
+            for line in self.list_animation_lines()
+        ]
+
 
 class CheckpointManager:
     def __init__(self):
