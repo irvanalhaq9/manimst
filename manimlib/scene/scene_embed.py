@@ -37,7 +37,7 @@ class InteractiveSceneEmbed:
         self.ensure_flash_on_error()
         if manim_config.embed.autoreload:
             self.auto_reload()
-        self.last_executed_line = None
+        self.last_executed_line = None # stored in 0-based index
         self.last_animation_number = None
 
     def launch(self):
@@ -100,6 +100,8 @@ class InteractiveSceneEmbed:
             shortcuts = self.list_shortcuts,
             list_animation_lines = self.list_animation_lines,
             end_of_play_lines = self.end_of_play_lines,
+            last_executed_line = self.get_last_executed_line,
+            set_last_executed_line = self.set_last_executed_line,
         )
 
     def list_shortcuts(self):
@@ -445,8 +447,10 @@ class InteractiveSceneEmbed:
         self.last_executed_line = end - 1  # Store the last executed line (0-based index)
 
         end_play_lines = self.end_of_play_lines()
-        if self.last_executed_line in end_play_lines:
-            idx = end_play_lines.index(self.last_executed_line)
+        last_ex_line = self.last_executed_line # stored in 0-based index
+        last_line = last_ex_line + 1
+        if last_line in end_play_lines:
+            idx = end_play_lines.index(last_line)
             if self.last_animation_number is None or idx > self.last_animation_number:
                 self.last_animation_number = idx
         if n is not None:
@@ -465,10 +469,15 @@ class InteractiveSceneEmbed:
             # `reload_animation_number()`
             ## NOTE: always insert an embed line at the animation line!
             if embed_line:
+                update_line = embed_line
+                last_ex_line = self.last_executed_line + 1
+                if last_ex_line:
+                    update_line = max(embed_line, last_ex_line)
+                
                 anim_lines = self.list_animation_lines()
                 import bisect
                 # this will give the index of the lowest number that greater than embed_line
-                idx = bisect.bisect_right(anim_lines, embed_line)
+                idx = bisect.bisect_right(anim_lines, update_line)
                 self.continue_run(n=idx)
             return
 
@@ -659,6 +668,14 @@ class InteractiveSceneEmbed:
             for line in self.list_animation_lines()
         ]
 
+    def get_last_executed_line(self):
+        if self.last_executed_line is None:
+            return None
+        # last_executed_line is actually stored in 0-based index
+        return self.last_executed_line + 1
+
+    def set_last_executed_line(self, line):
+        self.last_executed_line = line - 1
 
 class CheckpointManager:
     def __init__(self):
