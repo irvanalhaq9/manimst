@@ -1443,6 +1443,48 @@ class ArrowTip(Triangle):
     def get_length(self) -> float:
         return get_norm(self.get_vector())
 
+    def hide_tip(self, angle=PI/2, backward=True):
+        """
+        Rotasi tip 90° terhadap sisi dasarnya sehingga tampak menghilang.
+
+        Parameters
+        ----------
+        angle : float
+            Besar sudut rotasi. Default 90 derajat.
+        backward : bool
+            Jika True, rotasi ke arah belakang layar (OUT).
+            Jika False, ke arah depan layar (IN).
+        """
+        pts = self.get_points()
+
+        # Dua titik sudut dasar segitiga
+        p_top = pts[2]
+        p_bottom = pts[4]
+
+        # Sumbu rotasi = sepanjang sisi dasar
+        base_axis = normalize(p_top - p_bottom)
+
+        # Pivot = tengah sisi dasar
+        pivot = (p_top + p_bottom) / 2
+
+        self.base_axis = base_axis
+        self.hide_angle = angle
+        self.pivot = pivot
+
+        # Tentukan arah rotasi (masuk / keluar layar)
+        sign = -1 if backward else 1
+
+        self.rotate(sign * angle, axis=base_axis, about_point=pivot)
+
+    def tip_unhide_animation(self):
+        from manimlib.animation.rotation import Rotate
+        return Rotate(
+            self,
+            angle=self.hide_angle,
+            axis=self.base_axis,
+            about_point=self.pivot,
+        )
+
 
 class Rectangle(Polygon):
     '''
