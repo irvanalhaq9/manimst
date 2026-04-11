@@ -470,10 +470,10 @@ class InteractiveSceneEmbed:
             ## NOTE: always insert an embed line at the animation line!
             if embed_line:
                 update_line = embed_line
-                last_ex_line = self.last_executed_line + 1
+                last_ex_line = self.last_executed_line # base 0 index
                 if last_ex_line:
-                    update_line = max(embed_line, last_ex_line)
-                
+                    update_line = max(embed_line, last_ex_line+1)
+
                 anim_lines = self.list_animation_lines()
                 import bisect
                 # this will give the index of the lowest number that greater than embed_line
