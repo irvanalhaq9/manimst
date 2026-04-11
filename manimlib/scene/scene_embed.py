@@ -266,6 +266,7 @@ class InteractiveSceneEmbed:
             manim_config.run.embed_line = None
             manim_config.run.scene_names = []
             manim_config.scene.start_at_animation_number = None
+            manim_config.scene.skip_animations = False
 
         self.shell.run_line_magic("exit_raise", "")
 
